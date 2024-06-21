@@ -9,6 +9,33 @@ from PIL import Image, ImageTk
 from langdetect import detect
 
 from app.constant import read_file
+import speech_recognition as sr
+import pyaudio
+
+
+def convert_speech_to_text():
+    recognizer = sr.Recognizer()
+    with sr.Microphone() as source:
+        print("Hãy nói gì đó:")
+        audio = recognizer.listen(source)
+        try:
+            # Recognize speech in default language (Vietnamese)
+            text = recognizer.recognize_google(audio, language="vi-VN")
+            print("Văn bản đã chuyển đổi từ giọng nói: " + text)
+
+            # Detect language of the recognized text
+            detected_language = detect(text)
+            print("Ngôn ngữ được phát hiện: " + detected_language)
+
+            # Recognize speech again using detected language
+            text = recognizer.recognize_google(audio, language=detected_language)
+            print("Văn bản đã chuyển đổi từ giọng nói: " + text)
+        except sr.UnknownValueError:
+            print("Không thể nhận dạng giọng nói.")
+        except sr.RequestError:
+            print("Lỗi kết nối tới Google API.")
+        except Exception as e:
+            print(f"Đã xảy ra lỗi: {e}")
 
 
 def translate_text(text, target_language):
@@ -159,6 +186,9 @@ save_button.grid(row=9, column=0, columnspan=2, padx=5, pady=5)
 
 stop_button = tk.Button(frame, text="Stop", command=stop_text_to_speech)
 stop_button.grid(row=8, column=0, columnspan=2, padx=5, pady=5)
+
+speech_to_text_button = tk.Button(frame, text="Speech to Text", command=convert_speech_to_text)
+speech_to_text_button.grid(row=9, column=2, padx=5, pady=5, sticky="ew")
 
 # Control variable for speech playing state
 is_playing = False
